@@ -10,7 +10,9 @@ public interface EntidadService {
 
     Entidad findById(Long id);
 
-    Entidad save(Entidad data);
+    Entidad insert(Entidad data);
+
+    Entidad update(Entidad data, Long id);
 
     void delete(Long id);
 }
