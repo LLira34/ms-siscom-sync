@@ -2,8 +2,7 @@ package com.utng.siscom.sync.app.domain;
 
 import lombok.*;
 
-import javax.persistence.Entity;
-import javax.persistence.Table;
+import javax.persistence.*;
 import java.io.Serializable;
 
 @Setter
@@ -14,6 +13,8 @@ import java.io.Serializable;
 @Entity
 @Table(name = "entidades")
 public class Entidad implements Serializable {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private String nombre;
     private Boolean activo;
