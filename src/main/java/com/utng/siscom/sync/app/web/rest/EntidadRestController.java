@@ -8,13 +8,16 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -26,9 +29,24 @@ public class EntidadRestController extends SiscomRestController {
     private EntidadService entidadService;
 
     @GetMapping("/entidades")
-    public List<Entidad> findAll() {
+    public ResponseEntity<?> findAll(@RequestParam(name = "page", defaultValue = "0") Integer page,
+                                     @RequestParam(name = "limit", defaultValue = "5") Integer limit,
+                                     @RequestParam(name = "sort", defaultValue = "id") String sort,
+                                     @RequestParam(name = "order", defaultValue = "desc") String order) {
         log.info("findAll entidades");
-        return entidadService.findAll();
+        Map<String, Object> params = new HashMap<>();
+        Page<Entidad> entidades;
+        try {
+            Pageable pageable = order.equals("asc")
+                    ? PageRequest.of(page, limit, Sort.by(sort))
+                    : PageRequest.of(page, limit, Sort.by(sort).descending());
+            entidades = entidadService.findAll(pageable);
+        } catch (DataAccessException e) {
+            params.put("message", "Error al consultar los registros");
+            params.put("error", e.getMessage() + ": " + e.getMostSpecificCause().getMessage());
+            return internalServerError(params);
+        }
+        return ok(entidades);
     }
 
     @GetMapping("/entidades/{id}")
@@ -43,7 +61,7 @@ public class EntidadRestController extends SiscomRestController {
             return notFound(params);
         } catch (DataAccessException e) {
             params.put("message", "Error al consultar el registro");
-            params.put("error", e.getMessage() + ": " + e.getCause().getMessage());
+            params.put("error", e.getMessage() + ": " + e.getMostSpecificCause().getMessage());
             return internalServerError(params);
         }
         return ok(entidad);
@@ -64,7 +82,7 @@ public class EntidadRestController extends SiscomRestController {
             return badRequest(params);
         } catch (DataAccessException e) {
             params.put("message", "Error al insertar el registro");
-            params.put("error", e.getMessage() + ": " + e.getCause().getMessage());
+            params.put("error", e.getMessage() + ": " + e.getMostSpecificCause().getMessage());
             return internalServerError(params);
         }
         params.put("id", entidad.getId());
@@ -86,7 +104,7 @@ public class EntidadRestController extends SiscomRestController {
             return badRequest(params);
         } catch (DataAccessException e) {
             params.put("message", "Error al editar el registro");
-            params.put("error", e.getMessage() + ": " + e.getCause().getMessage());
+            params.put("error", e.getMessage() + ": " + e.getMostSpecificCause().getMessage());
             return internalServerError(params);
         }
         return ok(entidad);
@@ -103,7 +121,7 @@ public class EntidadRestController extends SiscomRestController {
             return badRequest(params);
         } catch (DataAccessException e) {
             params.put("message", "Error al eliminar el registro");
-            params.put("error", e.getMessage());
+            params.put("error", e.getMessage() + ": " + e.getMostSpecificCause().getMessage());
             return internalServerError(params);
         }
         return noContent();
