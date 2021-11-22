@@ -12,6 +12,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -47,6 +48,10 @@ public class EntidadServiceImpl implements EntidadService {
     public Entidad insert(Entidad data) {
         log.info("Data: {}", data.toString());
         Entidad entidad = this.validateData(data);
+        List<String> errors = this.validateErrors(entidad);
+        if (!errors.isEmpty()) {
+            throw new SiscomException("Error de datos", errors);
+        }
         return entidadRepository.save(entidad);
     }
 
@@ -55,6 +60,10 @@ public class EntidadServiceImpl implements EntidadService {
     public Entidad update(Entidad data, Long id) {
         Entidad entidad = this.findById(id);
         Entidad validate = this.validateData(data);
+        List<String> errors = this.validateErrors(validate);
+        if (!errors.isEmpty()) {
+            throw new SiscomException("Error de datos", errors);
+        }
         entidad.setNombre(validate.getNombre());
         entidad.setAlias(validate.getAlias());
         entidad.setActivo(validate.getActivo());
@@ -72,12 +81,20 @@ public class EntidadServiceImpl implements EntidadService {
         if (data.getActivo() == null) {
             data.setActivo(Boolean.FALSE);
         }
+        return data;
+    }
+
+    private List<String> validateErrors(Entidad data) {
+        List<String> errors = new ArrayList<>();
         if (data.getNombre() == null || data.getNombre().isEmpty() || data.getNombre().trim().equals("")) {
-            throw new SiscomException("El campo [Nombre] es obligatorio");
+            errors.add("El campo [Nombre] es obligatorio");
         }
         if (data.getAlias() == null || data.getAlias().isEmpty() || data.getAlias().trim().equals("")) {
-            throw new SiscomException("El campo [Alias] es obligatorio");
+            errors.add("El campo [Alias] es obligatorio");
         }
-        return data;
+        if (data.getAlias() != null && (data.getAlias().length() < 2 || data.getAlias().length() > 4)) {
+            errors.add("El campo [Alias] debe tener un tamaño entre 2 y 4 caracteres");
+        }
+        return errors;
     }
 }

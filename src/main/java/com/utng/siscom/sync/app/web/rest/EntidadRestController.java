@@ -13,10 +13,8 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
-import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
-import javax.validation.Valid;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -68,17 +66,15 @@ public class EntidadRestController extends SiscomRestController {
     }
 
     @PostMapping("/entidades")
-    public ResponseEntity<?> insert(@Valid @RequestBody Entidad data, BindingResult result) {
+    public ResponseEntity<?> insert(@RequestBody Entidad data) {
         log.info("Insert entidad");
         Entidad entidad;
         Map<String, Object> params = new HashMap<>();
-        if (result.hasErrors()) {
-            return validateField(result);
-        }
         try {
             entidad = entidadService.insert(data);
         } catch (SiscomException e) {
             params.put("message", e.getMessage());
+            params.put("errors", e.getErrors());
             return badRequest(params);
         } catch (DataAccessException e) {
             params.put("message", "Error al insertar el registro");
@@ -90,17 +86,15 @@ public class EntidadRestController extends SiscomRestController {
     }
 
     @PutMapping("/entidades/{id}")
-    public ResponseEntity<?> update(@Valid @RequestBody Entidad data, BindingResult result, @PathVariable Long id) {
+    public ResponseEntity<?> update(@RequestBody Entidad data, @PathVariable Long id) {
         log.info("Update entidad");
         Entidad entidad;
         Map<String, Object> params = new HashMap<>();
-        if (result.hasErrors()) {
-            return validateField(result);
-        }
         try {
             entidad = entidadService.update(data, id);
         } catch (SiscomException e) {
             params.put("message", e.getMessage());
+            params.put("errors", e.getErrors());
             return badRequest(params);
         } catch (DataAccessException e) {
             params.put("message", "Error al editar el registro");

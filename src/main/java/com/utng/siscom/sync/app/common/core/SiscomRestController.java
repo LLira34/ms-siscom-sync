@@ -2,12 +2,8 @@ package com.utng.siscom.sync.app.common.core;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.validation.BindingResult;
 
-import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 public class SiscomRestController {
 
@@ -37,15 +33,5 @@ public class SiscomRestController {
 
     protected ResponseEntity<?> internalServerError(Map<String, Object> params) {
         return ResponseEntity.internalServerError().body(params);
-    }
-
-    protected ResponseEntity<?> validateField(BindingResult result) {
-        Map<String, Object> params = new HashMap<>();
-        List<String> errors = result.getFieldErrors().stream()
-                .map(e -> "El campo [" + e.getField().toUpperCase() + "] " + e.getDefaultMessage())
-                .collect(Collectors.toList());
-        params.put("errors", errors);
-        params.put("message", "Error de datos");
-        return badRequest(params);
     }
 }
