@@ -24,6 +24,6 @@ public class Entidad implements Serializable {
     private Boolean activo;
     @Column(nullable = false, unique = true)
     @NotEmpty
-    @Size(min = 2, max = 4)
+    @Size(min = 2, max = 4, message = "debe tener un tamaño entre 2 y 4 caracteres")
     private String alias;
 }

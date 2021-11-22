@@ -9,8 +9,10 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -48,10 +50,13 @@ public class EntidadRestController extends SiscomRestController {
     }
 
     @PostMapping("/entidades")
-    public ResponseEntity<?> insert(@RequestBody Entidad data) {
+    public ResponseEntity<?> insert(@Valid @RequestBody Entidad data, BindingResult result) {
         log.info("Insert entidad");
         Entidad entidad;
         Map<String, Object> params = new HashMap<>();
+        if (result.hasErrors()) {
+            return validateField(result);
+        }
         try {
             entidad = entidadService.insert(data);
         } catch (SiscomException e) {
@@ -67,10 +72,13 @@ public class EntidadRestController extends SiscomRestController {
     }
 
     @PutMapping("/entidades/{id}")
-    public ResponseEntity<?> update(@RequestBody Entidad data, @PathVariable Long id) {
+    public ResponseEntity<?> update(@Valid @RequestBody Entidad data, BindingResult result, @PathVariable Long id) {
         log.info("Update entidad");
         Entidad entidad;
         Map<String, Object> params = new HashMap<>();
+        if (result.hasErrors()) {
+            return validateField(result);
+        }
         try {
             entidad = entidadService.update(data, id);
         } catch (SiscomException e) {
